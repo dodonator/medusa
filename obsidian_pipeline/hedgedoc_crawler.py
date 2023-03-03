@@ -58,7 +58,8 @@ def extract_urls(root: str, pad_id: str) -> list:
         link: Link
         target = link[2]  # Link(Attr, [Inline], Target)
         url: str = clean_url(target[0])
-        urls.append(url)
+        if url.startswith(root):
+            urls.append(url)
 
     return urls
 
@@ -94,11 +95,18 @@ root = args.root
 pad_id = args.start
 output_file = args.output
 
-urls: set = set(extract_urls(root, pad_id))
+start_url = f"{root}/{pad_id}"
 
-while urls:
-    current_url: str = urls.pop()
+urls_to_check: set = set((start_url,))
+checked_urls: set = set()
+
+while urls_to_check:
+    current_url = urls_to_check.pop()
     pad_id: str = pad_id_from_url(current_url)
-    more_urls: list = extract_urls(root, pad_id)
-    print(f"extracted {len(more_urls)} from pad '{pad_id}'")
-    urls.update(more_urls)
+    more_urls: set = set(extract_urls(root, pad_id)) - checked_urls
+    print(f"extracted {len(more_urls)} from {pad_id}")
+    urls_to_check.update(more_urls)
+
+    checked_urls.add(current_url)
+    break
+print(f"extracted {len(checked_urls)} urls in total")
