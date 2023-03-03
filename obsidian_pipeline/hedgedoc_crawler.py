@@ -1,4 +1,6 @@
+import json
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import Generator
 from urllib.parse import urljoin, urlparse
 
@@ -27,10 +29,16 @@ parser.add_argument("root", help="hegdedoc base url")
 parser.add_argument(
     "-s", "--start", required=False, default="navigation", help="start pad"
 )
+parser.add_argument(
+    "-o", "--output", required=False, default="urls.json", help="output file (json)"
+)
 
 args = parser.parse_args()
 root = args.root
 name = args.start
+output_file = args.output
+
+output_path: Path = Path(output_file)
 
 link_str: str = f"{root}/{name}/{DL}"
 response = requests.get(link_str)
@@ -48,4 +56,6 @@ for link in links:
     url: str = clean_url(target[0])
     pad_name = urlparse(url).path[1:]
     urls[pad_name] = url
-print(urls)
+
+with output_path.open("w", encoding="UTF-8") as stream:
+    json.dump(urls, stream, sort_keys=True)
