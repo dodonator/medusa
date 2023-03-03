@@ -23,7 +23,7 @@ def clean_url(url_str: str) -> str:
     return url_without_queries
 
 
-def extract_links(root: str, name: str) -> dict:
+def extract_urls(root: str, name: str) -> dict:
     """Extracts link urls from HedgeDoc Pad.
 
     Args:
@@ -82,6 +82,6 @@ root = args.root
 name = args.start
 output_file = args.output
 
-urls = extract_links(root, name)
+urls = extract_urls(root, name)
 with open(output_file, "w", encoding="UTF-8") as stream:
     json.dump(urls, stream)
