@@ -6,12 +6,13 @@ from pandoc.types import Link
 from rich import print as rich_print
 
 root: str = "https://md.chaosdorf.de"
-link: str = root + "/navigation/download"
-r = requests.get(link)
+name: str = "navigation"
+dw: str = "download"
 
-doc = pandoc.read(r.text)
+link = f"{root}/{name}/{dw}"
+response = requests.get(link)
 
-# rich_print(doc)
+doc = pandoc.read(response.text)
 
 meta, blocks = doc
 links: Generator = (block for block in pandoc.iter(blocks) if isinstance(block, Link))
@@ -20,4 +21,6 @@ links: Generator = (block for block in pandoc.iter(blocks) if isinstance(block, 
 for link in links:
     link: Link
     attr, inline, target = link
-    print(target)
+    link_text: str = pandoc.write(inline).strip()
+    url: str = target[0]
+    print(repr(link_text), url)
