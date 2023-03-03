@@ -1,6 +1,5 @@
 import json
 from argparse import ArgumentParser
-from pathlib import Path
 from typing import Generator
 from urllib.parse import urljoin, urlparse
 
@@ -24,6 +23,37 @@ def clean_url(url_str: str) -> str:
     return url_without_queries
 
 
+def extract_links(root: str, name: str) -> dict:
+    """Extracts link urls from HedgeDoc Pad.
+
+    Args:
+        root (str): base url of HedgeDoc
+        name (str): name of the pad
+
+    Returns:
+        dict: result (name:url)
+    """
+    link_str: str = f"{root}/{name}/{DL}"
+    response = requests.get(link_str)
+
+    doc: Pandoc = pandoc.read(response.text)
+
+    blocks = doc[1]
+    links: Generator = (
+        block for block in pandoc.iter(blocks) if isinstance(block, Link)
+    )
+
+    urls: dict = {}
+    for link in links:
+        link: Link
+        target = link[2]  # Link(Attr, [Inline], Target)
+        url: str = clean_url(target[0])
+        pad_name = urlparse(url).path[1:]
+        urls[pad_name] = url
+
+    return urls
+
+
 parser = ArgumentParser(description="Crawls the HedgeDoc.")
 parser.add_argument("root", help="hegdedoc base url")
 parser.add_argument(
@@ -38,24 +68,6 @@ root = args.root
 name = args.start
 output_file = args.output
 
-output_path: Path = Path(output_file)
-
-link_str: str = f"{root}/{name}/{DL}"
-response = requests.get(link_str)
-
-doc: Pandoc = pandoc.read(response.text)
-
-blocks = doc[1]
-links: Generator = (block for block in pandoc.iter(blocks) if isinstance(block, Link))
-
-# list all links
-urls: dict = {}
-for link in links:
-    link: Link
-    target = link[2]  # Link(Attr, [Inline], Target)
-    url: str = clean_url(target[0])
-    pad_name = urlparse(url).path[1:]
-    urls[pad_name] = url
-
-with output_path.open("w", encoding="UTF-8") as stream:
-    json.dump(urls, stream, sort_keys=True)
+urls = extract_links(root, name)
+with open(output_file, "w", encoding="UTF-8") as stream:
+    json.dump(urls, stream)
