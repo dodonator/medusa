@@ -36,7 +36,7 @@ def clean_url(url_str: str) -> str:
     return url_without_queries
 
 
-def extract_urls(root: str, pad_id: str) -> dict:
+def extract_urls(root: str, pad_id: str) -> list:
     """Extracts link urls from HedgeDoc Pad.
 
     Args:
@@ -53,12 +53,12 @@ def extract_urls(root: str, pad_id: str) -> dict:
         block for block in pandoc.iter(blocks) if isinstance(block, Link)
     )
 
-    urls: dict = {}
+    urls: list = []
     for link in links:
         link: Link
         target = link[2]  # Link(Attr, [Inline], Target)
         url: str = clean_url(target[0])
-        urls[pad_id] = url
+        urls.append(url)
 
     return urls
 
