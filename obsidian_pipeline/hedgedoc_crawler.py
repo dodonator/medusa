@@ -1,5 +1,5 @@
-import json
 from argparse import ArgumentParser
+from pathlib import Path
 from typing import Generator
 from urllib.parse import urljoin, urlparse
 
@@ -8,6 +8,10 @@ import requests
 from pandoc.types import Link, Pandoc
 
 DL: str = "download"
+output_path: Path = Path.cwd() / Path("pads")
+
+if not output_path.exists():
+    output_path.mkdir()
 
 
 def pad_id_from_url(url: str) -> str:
