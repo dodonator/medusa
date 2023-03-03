@@ -94,6 +94,11 @@ root = args.root
 pad_id = args.start
 output_file = args.output
 
-urls = extract_urls(root, pad_id)
-with open(output_file, "w", encoding="UTF-8") as stream:
-    json.dump(urls, stream)
+urls: set = set(extract_urls(root, pad_id))
+
+while urls:
+    current_url: str = urls.pop()
+    pad_id: str = pad_id_from_url(current_url)
+    more_urls: list = extract_urls(root, pad_id)
+    print(f"extracted {len(more_urls)} from pad '{pad_id}'")
+    urls.update(more_urls)
