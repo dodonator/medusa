@@ -3,7 +3,7 @@ from typing import Generator
 
 import pandoc
 import requests
-from pandoc.types import Link
+from pandoc.types import Link, Pandoc
 
 DL: str = "download"
 
@@ -20,15 +20,19 @@ name = args.start
 link_str: str = f"{root}/{name}/{DL}"
 response = requests.get(link_str)
 
-doc = pandoc.read(response.text)
+doc: Pandoc = pandoc.read(response.text)
 
-meta, blocks = doc
+blocks = doc[1]
 links: Generator = (block for block in pandoc.iter(blocks) if isinstance(block, Link))
 
 # list all links
+urls: set[str] = set()
 for link in links:
     link: Link
     attr, inline, target = link
     link_text: str = pandoc.write(inline).strip()
     url: str = target[0]
-    print(repr(link_text), url)
+    urls.add(url)
+    # print(repr(link_text), url)
+
+print(urls)
