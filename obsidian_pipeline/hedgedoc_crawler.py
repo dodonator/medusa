@@ -1,16 +1,24 @@
+from argparse import ArgumentParser
 from typing import Generator
 
 import pandoc
 import requests
 from pandoc.types import Link
-from rich import print as rich_print
 
-root: str = "https://md.chaosdorf.de"
-name: str = "navigation"
-dw: str = "download"
+DL: str = "download"
 
-link = f"{root}/{name}/{dw}"
-response = requests.get(link)
+parser = ArgumentParser(description="Crawls the HedgeDoc.")
+parser.add_argument("root", help="hegdedoc base url")
+parser.add_argument(
+    "-s", "--start", required=False, default="navigation", help="start pad"
+)
+
+args = parser.parse_args()
+root = args.root
+name = args.start
+
+link_str: str = f"{root}/{name}/{DL}"
+response = requests.get(link_str)
 
 doc = pandoc.read(response.text)
 
