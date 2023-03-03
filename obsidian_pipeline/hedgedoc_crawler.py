@@ -1,10 +1,12 @@
 from typing import Generator
-import requests
+
 import pandoc
+import requests
 from pandoc.types import Link
 from rich import print as rich_print
 
-link = "https://md.chaosdorf.de/navigation/download"
+root: str = "https://md.chaosdorf.de"
+link: str = root + "/navigation/download"
 r = requests.get(link)
 
 doc = pandoc.read(r.text)
