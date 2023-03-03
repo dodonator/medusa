@@ -41,12 +41,11 @@ blocks = doc[1]
 links: Generator = (block for block in pandoc.iter(blocks) if isinstance(block, Link))
 
 # list all links
-urls: set[str] = set()
+urls: dict = {}
 for link in links:
     link: Link
-    attr, inline, target = link
-    link_text: str = pandoc.write(inline).strip()
+    target = link[2]  # Link(Attr, [Inline], Target)
     url: str = clean_url(target[0])
-    urls.add(url)
-
+    pad_name = urlparse(url).path[1:]
+    urls[pad_name] = url
 print(urls)
