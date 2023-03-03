@@ -1,11 +1,26 @@
 from argparse import ArgumentParser
 from typing import Generator
+from urllib.parse import urljoin, urlparse
 
 import pandoc
 import requests
 from pandoc.types import Link, Pandoc
 
 DL: str = "download"
+
+
+def clean_url(url_str: str) -> str:
+    """
+    Removes queries from url.
+    Args:
+        url_str (str): url as str
+
+    Returns:
+        str: resulting url
+    """
+    url_without_queries = urljoin(url_str, urlparse(url_str).path)
+    return url_without_queries
+
 
 parser = ArgumentParser(description="Crawls the HedgeDoc.")
 parser.add_argument("root", help="hegdedoc base url")
@@ -31,8 +46,7 @@ for link in links:
     link: Link
     attr, inline, target = link
     link_text: str = pandoc.write(inline).strip()
-    url: str = target[0]
+    url: str = clean_url(target[0])
     urls.add(url)
-    # print(repr(link_text), url)
 
 print(urls)
