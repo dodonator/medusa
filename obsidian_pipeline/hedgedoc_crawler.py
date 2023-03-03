@@ -33,10 +33,7 @@ def extract_links(root: str, name: str) -> dict:
     Returns:
         dict: result (name:url)
     """
-    link_str: str = f"{root}/{name}/{DL}"
-    response = requests.get(link_str)
-
-    doc: Pandoc = pandoc.read(response.text)
+    doc: Pandoc = download_pad(root, name)
 
     blocks = doc[1]
     links: Generator = (
@@ -54,8 +51,25 @@ def extract_links(root: str, name: str) -> dict:
     return urls
 
 
+def download_pad(root: str, name: str) -> Pandoc:
+    """Downloads pad from HedgeDoc and returns it as pandoc document.
+
+    Args:
+        root (str): base url of HedgeDoc
+        name (str): name of the pad
+
+    Returns:
+        Pandoc: pad as pandoc document
+    """
+    link_str: str = f"{root}/{name}/{DL}"
+    response = requests.get(link_str)
+
+    doc: Pandoc = pandoc.read(response.text)
+    return doc
+
+
 parser = ArgumentParser(description="Crawls the HedgeDoc.")
-parser.add_argument("root", help="hegdedoc base url")
+parser.add_argument("root", help="HegdeDoc base url")
 parser.add_argument(
     "-s", "--start", required=False, default="navigation", help="start pad"
 )
