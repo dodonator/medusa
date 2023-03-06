@@ -15,7 +15,20 @@ if not output_path.exists():
 
 
 def get_pad_title(url: str) -> str:
-    return ""
+    """Returns title of HedgeDoc Pad.
+
+    Args:
+        url (str): url to the pad
+
+    Returns:
+        str: pad title
+    """
+    response = requests.get(url)
+    doc: Pandoc = pandoc.read(response.text)
+    meta: list = doc[0]
+    meta_dict: dict = meta[0]
+    title: str = pandoc.write(meta_dict.get("title")).strip()
+    return title
 
 
 def get_pad_tags(url: str) -> set[str]:
