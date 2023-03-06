@@ -27,10 +27,13 @@ urls_to_check: set = set((start_url,))
 checked_urls: set = set()
 
 while urls_to_check:
+    # get an pad url
     current_url = urls_to_check.pop()
     pad_id: str = pad_id_from_url(current_url)
+    # extract links to other pads
     more_urls: set = set(extract_urls(root, pad_id)) - checked_urls
     print(f"extracted {len(more_urls)} from {pad_id}")
+    # add new pads to queue
     urls_to_check.update(more_urls)
 
     checked_urls.add(current_url)
