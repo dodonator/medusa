@@ -1,7 +1,8 @@
 import hashlib
+from pathlib import Path
 from typing import Generator
 from urllib.parse import urljoin, urlparse
-from pathlib import Path
+
 import pandoc
 import requests
 from pandoc.types import Link, Pandoc
