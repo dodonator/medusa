@@ -29,13 +29,23 @@ checked_urls: set = set()
 while urls_to_check:
     # get an pad url
     current_url = urls_to_check.pop()
+
+    # TODO: create a checksum of pad
+    # TODO: save pad to filesystem
+
     pad_id: str = pad_id_from_url(current_url)
     # extract links to other pads
     more_urls: set = set(extract_urls(root, pad_id)) - checked_urls
     print(f"extracted {len(more_urls)} from {pad_id}")
+
+    # TODO: extract pad title
+    # TODO: extract pad tags
+
     # add new pads to queue
     urls_to_check.update(more_urls)
 
     checked_urls.add(current_url)
+
+# TODO: save pads as json
 
 print(f"extracted {len(checked_urls)} urls in total")
