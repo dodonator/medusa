@@ -14,6 +14,14 @@ if not output_path.exists():
     output_path.mkdir()
 
 
+def get_pad_title(url: str) -> str:
+    return ""
+
+
+def get_pad_tags(url: str) -> set[str]:
+    return set()
+
+
 def pad_id_from_url(url: str) -> str:
     """Returns pad_id from url.
 
@@ -112,5 +120,5 @@ while urls_to_check:
     urls_to_check.update(more_urls)
 
     checked_urls.add(current_url)
-    break
+
 print(f"extracted {len(checked_urls)} urls in total")
