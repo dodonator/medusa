@@ -1,11 +1,34 @@
+import hashlib
 from typing import Generator
 from urllib.parse import urljoin, urlparse
-
+from pathlib import Path
 import pandoc
 import requests
 from pandoc.types import Link, Pandoc
 
 DL: str = "download"
+
+
+def hash_file(path: Path) -> hashlib._Hash:
+    """Creates file checksum using md5.
+
+    Args:
+        path (Path): path to file
+
+    Returns:
+        hashlib._Hash: md5 checksum
+    """
+    BUF_SIZE = 256
+    md5 = hashlib.md5()
+
+    with path.open("rb") as stream:
+        while True:
+            data = stream.read(BUF_SIZE)
+            if not data:
+                break
+            md5.update(data)
+
+    return md5
 
 
 def get_pad_title(url: str) -> str:
