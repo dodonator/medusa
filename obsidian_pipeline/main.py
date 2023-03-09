@@ -1,6 +1,6 @@
 from argparse import ArgumentParser
 from pathlib import Path
-from crawler import pad_id_from_url, extract_urls
+from obsidian_pipeline.utils import pad_id_from_url, extract_urls
 
 output_path: Path = Path.cwd() / Path("pads")
 
