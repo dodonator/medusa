@@ -10,7 +10,7 @@ from pandoc.types import Link, Pandoc
 DL: str = "download"
 
 
-def hash_file(path: Path) -> hashlib._Hash:
+def hash_file(path: Path):
     """Creates file checksum using md5.
 
     Args:
