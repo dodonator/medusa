@@ -49,6 +49,7 @@ class Crawler:
             target = link[2]  # Link(Attr, [Inline], Target)
             url: str = clean_url(target[0])
             if url.startswith(self.root):
+                log.info(f"found link: {url}")
                 pad_id = pad_id_from_url(url)
                 linked_pads.append(pad_id)
 
@@ -84,3 +85,15 @@ class Crawler:
 
         with filepath.open("w", encoding="UTF-8") as stream:
             stream.write(text)
+
+    def get_title(self, pad_content: str) -> str:
+        doc: Pandoc = pandoc.read(pad_content)
+        meta: list = doc[0]
+        meta_dict: dict = meta[0]
+        title: str
+        if "title" in meta_dict:
+            title = pandoc.write(meta_dict.get("title")).strip()
+        else:
+            pass
+            # TODO search first h1 header
+        return title
