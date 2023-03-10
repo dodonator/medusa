@@ -29,7 +29,7 @@ class Crawler:
         pad_url: str = f"{self.root}/{pad_id}/download"
         response = requests.get(pad_url)
         status_code = response.status_code
-        log.info("[{}] from {}".format(status_code, pad_url))
+        log.info(f"[{status_code}] from {pad_url}")
         if status_code == 200:
             return response.text
         else:
@@ -61,14 +61,14 @@ class Crawler:
         while to_check:
             # get an pad
             current_pad = to_check.pop()
-            log.info("looking for links in {}".format(current_pad))
+            log.info(f"looking for links in {current_pad}")
 
             # download pad
             text = self.get(current_pad)
 
             # extract links to other pads
             new_pads: set = set(self.extract(text)) - checked
-            log.info("found {} pads in {}".format(len(new_pads), current_pad))
+            log.info(f"found {len(new_pads)} pads in {current_pad}")
 
             # add new pads to queue
             to_check.update(new_pads)
@@ -80,7 +80,7 @@ class Crawler:
         text: str = self.get(pad_id)
         filename = f"{pad_id}.md"
         filepath = self.output_dir / Path(filename)
-        log.info("downloading {} into {}".format(pad_id, filepath))
+        log.info(f"downloading {pad_id} into {filepath}")
 
         with filepath.open("w", encoding="UTF-8") as stream:
             stream.write(text)
