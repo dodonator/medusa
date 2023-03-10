@@ -25,13 +25,24 @@ class Crawler:
         if not self.output_dir.exists():
             self.output_dir.mkdir()
 
-    def get(self, pad_id: str) -> str:
+    def get_from_hedgedoc(self, pad_id: str) -> str:
         pad_url: str = f"{self.root}/{pad_id}/download"
         response = requests.get(pad_url)
         status_code = response.status_code
         log.info(f"[{status_code}] from {pad_url}")
         if status_code == 200:
-            return response.text
+            text: str = response.text
+            return text
+        else:
+            return ""
+
+    def get_local(self, pad_id: str) -> str:
+        filename: str = f"{pad_id}.md"
+        path: Path = self.output_dir / Path(filename)
+        if path.exists():
+            with path.open("r", encoding="UTF-8") as stream:
+                text: str = stream.read()
+            return text
         else:
             return ""
 
@@ -65,7 +76,7 @@ class Crawler:
             log.info(f"looking for links in {current_pad}")
 
             # download pad
-            text = self.get(current_pad)
+            text = self.get_from_hedgedoc(current_pad)
 
             # extract links to other pads
             new_pads: set = set(self.extract(text)) - checked
@@ -78,7 +89,7 @@ class Crawler:
         return checked
 
     def download(self, pad_id):
-        text: str = self.get(pad_id)
+        text: str = self.get_from_hedgedoc(pad_id)
         filename = f"{pad_id}.md"
         filepath = self.output_dir / Path(filename)
         log.info(f"downloading {pad_id} into {filepath}")
