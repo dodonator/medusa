@@ -25,11 +25,11 @@ class Crawler:
         if not self.output_dir.exists():
             self.output_dir.mkdir()
 
-    def get(self, pad_id: str) -> str:
+    def get(self, pad_id: str, force_download: bool = False) -> str:
         text: str
         filename: str = f"{pad_id}.md"
         path: Path = self.output_dir / Path(filename)
-        if path.exists():
+        if path.exists() and not force_download:
             log.info(f"reading pad {pad_id!r} from file {path}")
             with path.open("r", encoding="UTF-8") as stream:
                 text = stream.read()
