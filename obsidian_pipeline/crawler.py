@@ -5,7 +5,7 @@ from typing import Generator
 
 import pandoc
 import requests
-from pandoc.types import Link, Pandoc
+from pandoc.types import Header, Link, Pandoc
 from utils import clean_url, pad_id_from_url
 
 
@@ -93,7 +93,16 @@ class Crawler:
         title: str
         if "title" in meta_dict:
             title = pandoc.write(meta_dict.get("title")).strip()
+            log.info(f"found title {title!r} in meta data")
         else:
-            pass
-            # TODO search first h1 header
+            blocks: list = doc[1]
+            header: list[Header] = [
+                block for block in blocks if isinstance(block, Header) and block[0] == 1
+            ]
+            if header:
+                title = pandoc.write(header[0]).strip()
+                log.info(f"first header was {title!r}")
+            else:
+                title = ""
+                log.info("no title found")
         return title
