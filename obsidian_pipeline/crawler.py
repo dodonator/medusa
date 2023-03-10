@@ -17,6 +17,7 @@ class Crawler:
         self.root = root_url
         self.found_pads = set()
 
+        # sets up output directory
         if output_dir is None:
             self.output_dir = Path.cwd() / Path("output")
         else:
@@ -29,16 +30,21 @@ class Crawler:
         text: str
         filename: str = f"{pad_id}.md"
         path: Path = self.output_dir / Path(filename)
+
+        # tries to load pad from local copy
         if path.exists() and not force_download:
             log.info(f"reading pad {pad_id!r} from file {path}")
             with path.open("r", encoding="UTF-8") as stream:
                 text = stream.read()
         else:
+            # loads pad from hedgedoc
             pad_url: str = f"{self.root}/{pad_id}/download"
             log.info(f"reading pad {pad_id!r} from file {pad_url}")
+
             response = requests.get(pad_url)
             status_code: int = response.status_code
             log.info(f"got {status_code} from {pad_url}")
+
             if status_code == 200:
                 text = response.text
             else:
@@ -50,6 +56,8 @@ class Crawler:
         doc: Pandoc = pandoc.read(pad_content)
 
         blocks = doc[1]
+
+        # filters all link objects
         link_objects: Generator = (
             block for block in pandoc.iter(blocks) if isinstance(block, Link)
         )
@@ -58,10 +66,14 @@ class Crawler:
         for link in link_objects:
             link: Link
             target = link[2]  # Link(Attr, [Inline], Target)
+
+            # removes queries from url
             url: str = clean_url(target[0])
+
             if url.startswith(self.root):
                 log.info(f"found link: {url}")
                 pad_id = pad_id_from_url(url)
+
                 linked_pads.append(pad_id)
 
         return linked_pads
@@ -90,6 +102,7 @@ class Crawler:
 
     def download(self, pad_id):
         text: str = self.get(pad_id, force_download=True)
+
         filename = f"{pad_id}.md"
         filepath = self.output_dir / Path(filename)
         log.info(f"downloading {pad_id} into {filepath}")
@@ -102,18 +115,23 @@ class Crawler:
         meta: list = doc[0]
         meta_dict: dict = meta[0]
         title: str
+
+        # tries to get title from meta data
         if "title" in meta_dict:
             title = pandoc.write(meta_dict.get("title")).strip()
             log.info(f"found title {title!r} in meta data")
+
         else:
             blocks: list = doc[1]
             header: list[Header] = [
                 block for block in blocks if isinstance(block, Header) and block[0] == 1
             ]
             if header:
+                # uses first h1 header as title
                 title = pandoc.write(header[0]).strip()
                 log.info(f"first header was {title!r}")
             else:
                 title = ""
                 log.info("no title found")
+
         return title
