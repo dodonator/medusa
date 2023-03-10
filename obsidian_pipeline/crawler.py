@@ -25,26 +25,26 @@ class Crawler:
         if not self.output_dir.exists():
             self.output_dir.mkdir()
 
-    def get_from_hedgedoc(self, pad_id: str) -> str:
-        pad_url: str = f"{self.root}/{pad_id}/download"
-        response = requests.get(pad_url)
-        status_code = response.status_code
-        log.info(f"[{status_code}] from {pad_url}")
-        if status_code == 200:
-            text: str = response.text
-            return text
-        else:
-            return ""
-
-    def get_local(self, pad_id: str) -> str:
+    def get(self, pad_id: str) -> str:
+        text: str
         filename: str = f"{pad_id}.md"
         path: Path = self.output_dir / Path(filename)
         if path.exists():
+            log.info(f"reading pad {pad_id!r} from file {path}")
             with path.open("r", encoding="UTF-8") as stream:
-                text: str = stream.read()
-            return text
+                text = stream.read()
         else:
-            return ""
+            pad_url: str = f"{self.root}/{pad_id}/download"
+            log.info(f"reading pad {pad_id!r} from file {pad_url}")
+            response = requests.get(pad_url)
+            status_code: int = response.status_code
+            log.info(f"got {status_code} from {pad_url}")
+            if status_code == 200:
+                text = response.text
+            else:
+                log.info(f"Couldn't download pad {pad_url}")
+                text = ""
+        return text
 
     def extract(self, pad_content: str) -> list[str]:
         doc: Pandoc = pandoc.read(pad_content)
@@ -76,7 +76,7 @@ class Crawler:
             log.info(f"looking for links in {current_pad}")
 
             # download pad
-            text = self.get_from_hedgedoc(current_pad)
+            text = self.get(current_pad)
 
             # extract links to other pads
             new_pads: set = set(self.extract(text)) - checked
@@ -89,7 +89,7 @@ class Crawler:
         return checked
 
     def download(self, pad_id):
-        text: str = self.get_from_hedgedoc(pad_id)
+        text: str = self.get(pad_id)
         filename = f"{pad_id}.md"
         filepath = self.output_dir / Path(filename)
         log.info(f"downloading {pad_id} into {filepath}")
