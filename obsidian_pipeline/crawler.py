@@ -89,7 +89,7 @@ class Crawler:
         return checked
 
     def download(self, pad_id):
-        text: str = self.get(pad_id)
+        text: str = self.get(pad_id, force_download=True)
         filename = f"{pad_id}.md"
         filepath = self.output_dir / Path(filename)
         log.info(f"downloading {pad_id} into {filepath}")
