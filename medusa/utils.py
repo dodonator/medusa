@@ -5,6 +5,7 @@ from urllib.parse import urljoin, urlparse
 
 import pandoc
 from pandoc.types import Pandoc, Header
+import re
 
 
 def hash_file(path: Path):
@@ -65,6 +66,7 @@ def get_title(pad_content: str) -> str:
     if "title" in meta_dict:
         title = pandoc.write(meta_dict.get("title")).strip()
         log.info(f"found title {title!r} in meta data")
+        return title
 
     else:
         blocks: list = doc[1]
@@ -74,10 +76,13 @@ def get_title(pad_content: str) -> str:
         if header:
             # uses first h1 header as title
             title = pandoc.write(header[0]).strip()
-            # TODO: clean title
             log.info(f"first header was {title!r}")
-        else:
-            title = ""
-            log.info("no title found")
 
-    return title
+            source_pattern = r"[\-~#/ ]+"
+            target_pattern = r"_"
+            clean_title: str = re.sub(source_pattern, target_pattern, title)
+            clean_title = clean_title.strip("_")
+            return clean_title
+        else:
+            log.info("no title found")
+            return ""
