@@ -15,7 +15,6 @@ class Crawler:
 
     def __init__(self, root_url: str, output_dir: Path | None = None):
         self.root = root_url
-        self.found_pads = set()
 
         # sets up output directory
         if output_dir is None:
@@ -63,8 +62,8 @@ class Crawler:
         )
 
         linked_pads: list = []
+        link: Link
         for link in link_objects:
-            link: Link
             target = link[2]  # Link(Attr, [Inline], Target)
 
             # removes queries from url
