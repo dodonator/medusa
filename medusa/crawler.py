@@ -108,29 +108,3 @@ class Crawler:
 
         with filepath.open("w", encoding="UTF-8") as stream:
             stream.write(text)
-
-    def get_title(self, pad_content: str) -> str:
-        doc: Pandoc = pandoc.read(pad_content)
-        meta: list = doc[0]
-        meta_dict: dict = meta[0]
-        title: str
-
-        # tries to get title from meta data
-        if "title" in meta_dict:
-            title = pandoc.write(meta_dict.get("title")).strip()
-            log.info(f"found title {title!r} in meta data")
-
-        else:
-            blocks: list = doc[1]
-            header: list[Header] = [
-                block for block in blocks if isinstance(block, Header) and block[0] == 1
-            ]
-            if header:
-                # uses first h1 header as title
-                title = pandoc.write(header[0]).strip()
-                log.info(f"first header was {title!r}")
-            else:
-                title = ""
-                log.info("no title found")
-
-        return title
