@@ -25,13 +25,16 @@ class Converter:
         self.link_pattern = (
             r"\[(?P<text>.+)\]\((?P<url>"
             + self.root
-            + r"/(?P<pad>[A-Za-z0-9\-_\.#\?/%]*)\)"
+            + r")/(?P<pad>[A-Za-z0-9\-_\.#\?/%]*)\)"
         )
 
-    def convert_single_pad(self, pad_path: Path) -> int:
-        pad_content: str = pad_path.read_text(encoding="UTF-8")
-        matches = re.findall(self.link_pattern, pad_content)
+    def convert_single_pad(self, input_pad: Path) -> int:
+        output_pad: Path = self.output_dir / Path(input_pad.name)
+        pad_content: str = input_pad.read_text(encoding="UTF-8")
 
+        log.info(f"convert links in {input_pad} into {output_pad}")
+
+        matches = re.findall(self.link_pattern, pad_content)
         for match in matches:
             text, url, pad = match
             clean_pad: str
@@ -45,7 +48,8 @@ class Converter:
             new: str = OBSIDIAN_TEMPLATE.format(clean_pad, text)
             pad_content = pad_content.replace(old, new)
 
-        pad_path.write_text(pad_content, encoding="UTF-8")
+        output_pad.touch()
+        output_pad.write_text(pad_content, encoding="UTF-8")
         return len(matches)
 
     def convert(self):
@@ -55,7 +59,7 @@ class Converter:
         total_links_number: int = 0
         for pad_path in all_pads:
             number_of_links_converted: int = self.convert_single_pad(pad_path)
-            log.info(f"converted {number_of_links_converted} links in {pad_path.file}")
+            log.info(f"converted {number_of_links_converted} links in {pad_path.name}")
             total_links_number += number_of_links_converted
             number_of_pads += 1
 

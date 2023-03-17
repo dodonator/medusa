@@ -6,7 +6,7 @@ from obsidian_pipeline.crawler import Crawler
 
 logging.basicConfig(filename="crawler.log", filemode="w", level=logging.DEBUG)
 
-root = "https://md.chaosdorf.de"
+root = r"https://md.chaosdorf.de"
 start = "navigation"
 
 pad_dir: Path = Path.cwd() / Path("pads")
