@@ -1,11 +1,11 @@
 import hashlib
 import logging as log
+import re
 from pathlib import Path
 from urllib.parse import urljoin, urlparse
 
 import pandoc
-from pandoc.types import Pandoc, Header
-import re
+from pandoc.types import Header, Pandoc
 
 
 def hash_file(path: Path):
