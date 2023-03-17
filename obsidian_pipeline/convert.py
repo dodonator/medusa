@@ -3,9 +3,6 @@ import re
 from pathlib import Path
 from typing import Generator
 
-# TODO: make link syntax conversion modular
-# TODO: iterate over all files and substitute the link syntax
-
 root = "https://md.chaosdorf.de"
 LINK_PATTERN = (
     r"\[(?P<text>.+)\]\((?P<url>.+md\.chaosdorf\.de)/(?P<pad>[A-Za-z0-9\-_\.#\?/%]*)\)"
