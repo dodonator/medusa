@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
+import logging as log
 import re
 from pathlib import Path
 from typing import Generator
-import logging as log
 
 HD_TEMPLATE = "[{}]({}/{})"
 OBSIDIAN_TEMPLATE = "[[{}|{}]]"
