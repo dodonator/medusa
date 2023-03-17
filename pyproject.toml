@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "obsidian-pipeline"
+name = "medusa"
 version = "0.1.0"
 description = ""
 authors = ["dodonator <dodo@chaosdorf.de>"]
