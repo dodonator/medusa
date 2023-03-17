@@ -5,8 +5,8 @@ from typing import Generator
 
 import pandoc
 import requests
-from pandoc.types import Header, Link, Pandoc
-from medusa.utils import clean_url, pad_id_from_url
+from pandoc.types import Link, Pandoc
+from utils import clean_url, pad_id_from_url
 
 
 class Crawler:
