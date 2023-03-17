@@ -1,8 +1,8 @@
 import logging
 from pathlib import Path
 
-from obsidian_pipeline.converter import Converter
-from obsidian_pipeline.crawler import Crawler
+from medusa.converter import Converter
+from medusa.crawler import Crawler
 
 logging.basicConfig(filename="crawler.log", filemode="w", level=logging.DEBUG)
 
