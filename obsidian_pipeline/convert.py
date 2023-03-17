@@ -8,7 +8,7 @@ from typing import Generator
 
 root = "https://md.chaosdorf.de"
 LINK_PATTERN = (
-    r"\[(?P<text>.+)\]\((?P<url>.+md\.chaosdorf\.de)/(?P<pad>[A-Za-z0-9\-_\.#\?/]*)\)"
+    r"\[(?P<text>.+)\]\((?P<url>.+md\.chaosdorf\.de)/(?P<pad>[A-Za-z0-9\-_\.#\?/%]*)\)"
 )
 LINK_TEMPLATE = "[{}]({}/{})"
 
@@ -19,9 +19,15 @@ def convert_to_obsidian_links(pad_path: Path) -> int:
 
     for match in matches:
         text, url, pad = match
-        # TODO: clean pad from queries
+        clean_pad: str
+        if "?" in pad:
+            clean_pad = pad.split("?")[0]
+        elif "#" in pad:
+            clean_pad = pad.split("#")[0]
+        else:
+            clean_pad = pad
         old: str = LINK_TEMPLATE.format(text, url, pad)
-        new: str = f"[[{pad}|{text}]]"
+        new: str = f"[[{clean_pad}|{text}]]"
         pad_content = pad_content.replace(old, new)
 
     pad_path.write_text(pad_content, encoding="UTF-8")
