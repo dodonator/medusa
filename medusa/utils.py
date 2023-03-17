@@ -74,6 +74,7 @@ def get_title(pad_content: str) -> str:
         if header:
             # uses first h1 header as title
             title = pandoc.write(header[0]).strip()
+            # TODO: clean title
             log.info(f"first header was {title!r}")
         else:
             title = ""
