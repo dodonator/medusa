@@ -4,7 +4,7 @@ version = "0.1.0"
 description = ""
 authors = ["dodonator <dodo@chaosdorf.de>"]
 readme = "README.md"
-packages = [{include = "obsidian_pipeline"}]
+packages = [{include = "medusa"}]
 
 [tool.poetry.dependencies]
 python = "^3.10"
