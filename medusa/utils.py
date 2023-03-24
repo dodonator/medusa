@@ -57,6 +57,14 @@ def clean_url(url_str: str) -> str:
 
 
 def get_title(pad_content: str) -> str:
+    """Tries to extract title of pad from content.
+
+    Args:
+        pad_content (str): content of pad
+
+    Returns:
+        str: pad title
+    """
     doc: Pandoc = pandoc.read(pad_content)
     meta: list = doc[0]
     meta_dict: dict = meta[0]
