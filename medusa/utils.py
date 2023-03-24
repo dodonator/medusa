@@ -17,12 +17,12 @@ def hash_file(path: Path):
     Returns:
         hashlib._Hash: md5 checksum
     """
-    BUF_SIZE = 256
+    buffer_size: int = 256
     md5 = hashlib.md5()
 
     with path.open("rb") as stream:
         while True:
-            data = stream.read(BUF_SIZE)
+            data = stream.read(buffer_size)
             if not data:
                 break
             md5.update(data)
@@ -68,21 +68,20 @@ def get_title(pad_content: str) -> str:
         log.info(f"found title {title!r} in meta data")
         return title
 
-    else:
-        blocks: list = doc[1]
-        header: list[Header] = [
-            block for block in blocks if isinstance(block, Header) and block[0] == 1
-        ]
-        if header:
-            # uses first h1 header as title
-            title = pandoc.write(header[0]).strip()
-            log.info(f"first header was {title!r}")
+    blocks: list = doc[1]
+    header: list[Header] = [
+        block for block in blocks if isinstance(block, Header) and block[0] == 1
+    ]
+    if header:
+        # uses first h1 header as title
+        title = pandoc.write(header[0]).strip()
+        log.info(f"first header was {title!r}")
 
-            source_pattern = r"[\-~#/ ]+"
-            target_pattern = r"_"
-            clean_title: str = re.sub(source_pattern, target_pattern, title)
-            clean_title = clean_title.strip("_")
-            return clean_title
-        else:
-            log.info("no title found")
-            return ""
+        source_pattern = r"[\-~#/ ]+"
+        target_pattern = r"_"
+        clean_title: str = re.sub(source_pattern, target_pattern, title)
+        clean_title = clean_title.strip("_")
+        return clean_title
+
+    log.info("no title found")
+    return ""
