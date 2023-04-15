@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 import logging as log
-from pathlib import Path
 import re
+from pathlib import Path
 from typing import Generator
 from urllib.parse import ParseResult, urljoin, urlparse
 
