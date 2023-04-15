@@ -56,3 +56,6 @@ class Pad:
                 links.append(pad_link)
 
         return links
+
+    def __repr__(self) -> str:
+        return f"Pad({self.url})"
