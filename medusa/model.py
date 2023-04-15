@@ -135,6 +135,10 @@ class Pad:
         for link_obj in link_objects:
             pad_link = PadLink(link_obj)
 
+            if self.url == pad_link.clean:
+                log.warning(f"circular import in pad {self.title}")
+                continue
+
             if pad_link.root == self.root:
                 log.info(f"found link: {pad_link}")
                 links.append(pad_link)
