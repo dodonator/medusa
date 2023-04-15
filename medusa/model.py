@@ -59,7 +59,7 @@ class Pad:
 
     @property
     def content(self) -> str:
-        if hasattr(self, "content"):
+        if hasattr(self, "_content"):
             return self._content
 
         url = f"{self.url}/download"
@@ -76,7 +76,7 @@ class Pad:
 
     @property
     def title(self) -> str:
-        if hasattr(self, "title"):
+        if hasattr(self, "_title"):
             return self._title
 
         doc: Pandoc = pandoc.read(self.content)
@@ -116,10 +116,10 @@ class Pad:
 
     @property
     def filename(self) -> Path:
-        if hasattr(self, "filename"):
+        if hasattr(self, "_filename"):
             return self._filename
-        filename = Path(f"{self.title}.md")
-        return filename
+        self._filename = Path(f"{self.title}.md")
+        return self._filename
 
     def extract(self) -> list[PadLink]:
         doc: Pandoc = pandoc.read(self.content)
