@@ -11,13 +11,13 @@ log.basicConfig(filename="medusa.log", filemode="w", level=log.WARNING)
 # TODO: implement local caching
 
 # setting up working directory
-working_dir = Path("/home/dodo/chaosdorf_vault")
+working_dir: Path = Path("/home/dodo/chaosdorf_vault")
 working_dir.mkdir(exist_ok=True)
 
-url = "https://md.chaosdorf.de/navigation"
+url: str = "https://md.chaosdorf.de/navigation"
 
 # crawling for all linked pads
-pads = crawl(url)
+pads: list[Pad] = crawl(url)
 
 pad: Pad
 for pad in pads:
@@ -27,15 +27,15 @@ for pad in pads:
 
     links: list[PadLink] = pad.outgoing_links
     log.info(f"found {len(links)} outgoing links in {pad}")
-    p_link: PadLink
 
+    p_link: PadLink
     for p_link in links:
         old: str = p_link.raw
         if old not in content:
             log.error(f"Couldn't find {old} in {pad}")
             continue
 
-        tmp_p = Pad(p_link.clean)
+        tmp_p: Pad = Pad(p_link.clean)
         obsidian_link: str = f"[[{tmp_p.title}|{p_link.text}]]"
 
         # replace markdown links with obsidian links
@@ -43,7 +43,8 @@ for pad in pads:
         content = content.replace(old, obsidian_link)
 
     # saving changed content
-    filepath = working_dir / pad.filename
+    filepath: Path = working_dir / pad.filename
+
     stream: TextIO
     with filepath.open("w") as stream:
         stream.write(content)
