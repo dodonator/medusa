@@ -3,6 +3,7 @@ from __future__ import annotations
 import logging as log
 import re
 from pathlib import Path
+from traceback import extract_stack
 from typing import Generator
 from urllib.parse import ParseResult, urljoin, urlparse
 
@@ -48,6 +49,7 @@ class Pad:
     name: str
     url: str
     root: str
+    _outgoing_links: list[PadLink]
     _content: str
     _filename: Path
     _title: str
@@ -122,7 +124,11 @@ class Pad:
         self._filename = Path(f"{self.title}.md")
         return self._filename
 
-    def extract(self) -> list[PadLink]:
+    @property
+    def outgoing_links(self) -> list[PadLink]:
+        if hasattr(self, "_outgoing_links"):
+            return self._outgoing_links
+
         doc: Pandoc = pandoc.read(self.content)
         blocks: list = doc[1]
 
@@ -144,7 +150,8 @@ class Pad:
                 log.info(f"found link: {pad_link}")
                 links.append(pad_link)
 
-        return links
+        self._outgoing_links = self._outgoing_links
+        return self._outgoing_links
 
     def __repr__(self) -> str:
         return f"Pad({self.title})"
