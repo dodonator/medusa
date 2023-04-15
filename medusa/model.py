@@ -3,7 +3,6 @@ from __future__ import annotations
 import logging as log
 import re
 from pathlib import Path
-from traceback import extract_stack
 from typing import Generator
 from urllib.parse import ParseResult, urljoin, urlparse
 
