@@ -25,7 +25,7 @@ class Pad:
         self.root = parse_result.netloc
         self.name = parse_result.path
 
-    def get_content(self) -> str:
+    def get_content(self) -> str:  # TODO: replace with property
         if hasattr(self, "content"):
             return self.content
 
@@ -41,7 +41,7 @@ class Pad:
         self.content = content
         return content
 
-    def get_title(self) -> str:
+    def get_title(self) -> str:  # TODO: replace with property
         if hasattr(self, "title"):
             return self.title
 
@@ -79,6 +79,13 @@ class Pad:
         self.title = clean_title
 
         return clean_title
+
+    def get_filename(self) -> Path:  # TODO: replace with property
+        if hasattr(self, "filename"):
+            return self.filename
+        title = self.get_title()
+        filename = Path(f"{title}.md")
+        return filename
 
     def extract(self) -> list[PadLink]:
         doc: Pandoc = pandoc.read(self.get_content())
