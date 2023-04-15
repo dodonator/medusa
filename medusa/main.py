@@ -7,6 +7,9 @@ from medusa.model import Pad, PadLink
 
 log.basicConfig(filename="medusa.log", filemode="w", level=log.WARNING)
 
+# TODO: reimplement argument parser
+# TODO: implement local caching
+
 # setting up working directory
 working_dir = Path("/home/dodo/chaosdorf_vault")
 working_dir.mkdir(exist_ok=True)
