@@ -128,7 +128,6 @@ class Pad:
     def outgoing_links(self) -> list[PadLink]:
         if hasattr(self, "_outgoing_links"):
             return self._outgoing_links
-
         doc: Pandoc = pandoc.read(self.content)
         blocks: list = doc[1]
 
@@ -150,7 +149,7 @@ class Pad:
                 log.info(f"found link: {pad_link}")
                 links.append(pad_link)
 
-        self._outgoing_links = self._outgoing_links
+        self._outgoing_links = links
         return self._outgoing_links
 
     def __repr__(self) -> str:
