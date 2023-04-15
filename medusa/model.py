@@ -45,11 +45,11 @@ class PadLink:
 
 class Pad:
     name: str
-    title: str
     url: str
     root: str
-    filename: Path
-    content: str
+    _content: str
+    _filename: Path
+    _title: str
 
     def __init__(self, url: str) -> None:
         self.url = url
@@ -57,9 +57,10 @@ class Pad:
         self.root = parse_result.netloc
         self.name = parse_result.path
 
-    def get_content(self) -> str:  # TODO: replace with property
+    @property
+    def content(self) -> str:
         if hasattr(self, "content"):
-            return self.content
+            return self._content
 
         url = f"{self.url}/download"
         response: requests.models.Response = requests.get(url)
@@ -70,14 +71,15 @@ class Pad:
         else:
             log.error(f"Couldn't download pad {self.url}")
             raise Exception("Couldn't download pad {self.url}")
-        self.content = content
+        self._content = content
         return content
 
-    def get_title(self) -> str:  # TODO: replace with property
+    @property
+    def title(self) -> str:
         if hasattr(self, "title"):
-            return self.title
+            return self._title
 
-        doc: Pandoc = pandoc.read(self.get_content())
+        doc: Pandoc = pandoc.read(self.content)
         meta: list = doc[0]
         blocks: list = doc[1]
         title: str
@@ -108,19 +110,19 @@ class Pad:
         clean_title: str = re.sub(source_pattern, target_pattern, title)
         clean_title = clean_title.strip("_")
 
-        self.title = clean_title
+        self._title = clean_title
 
-        return clean_title
+        return self._title
 
-    def get_filename(self) -> Path:  # TODO: replace with property
+    @property
+    def filename(self) -> Path:
         if hasattr(self, "filename"):
-            return self.filename
-        title = self.get_title()
-        filename = Path(f"{title}.md")
+            return self._filename
+        filename = Path(f"{self.title}.md")
         return filename
 
     def extract(self) -> list[PadLink]:
-        doc: Pandoc = pandoc.read(self.get_content())
+        doc: Pandoc = pandoc.read(self.content)
         blocks: list = doc[1]
 
         # filters all link objects
@@ -140,4 +142,4 @@ class Pad:
         return links
 
     def __repr__(self) -> str:
-        return f"Pad({self.url})"
+        return f"Pad({self.title})"
