@@ -3,8 +3,6 @@ import logging as log
 
 from medusa.model import Pad, PadLink
 
-log.basicConfig(level=log.INFO)
-
 
 def crawl(url: str) -> list[Pad]:
     start = Pad(url)
@@ -27,7 +25,3 @@ def crawl(url: str) -> list[Pad]:
 
     found_pads: list[Pad] = list(checked)
     return found_pads
-
-
-url = "https://md.chaosdorf.de/navigation"
-pads = crawl(url)

@@ -23,7 +23,7 @@ class PadLink:
         # Link(Attr, [Inline], Target)
         _, inline, target = link_obj
 
-        self.raw = pandoc.write(link_obj).strip()
+        self.raw = pandoc.write(link_obj).strip()  # TODO: fix newlines in raw
         url: ParseResult = urlparse(target[0])
 
         # remove queries and fragments
