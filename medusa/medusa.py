@@ -2,15 +2,25 @@
 import logging as log
 from pathlib import Path
 from typing import Generator, TextIO
+from urllib.parse import ParseResult, urljoin, urlparse
 
 import pandoc
 import requests
 from pandoc.types import Link, Pandoc
-from rich import print
-from urllib.parse import ParseResult, urlparse, urljoin
 
 
-def download(url) -> str:
+def download(url: str) -> str:
+    """Downloads pad content from url.
+
+    Args:
+        url (str): url to pad
+
+    Raises:
+        Exception: http status code
+
+    Returns:
+        str: pad content
+    """
     url = f"{url}/download"
     response: requests.models.Response = requests.get(url)
     status_code: int = response.status_code
@@ -24,6 +34,14 @@ def download(url) -> str:
 
 
 def extract_link_objects(pad_content: str) -> list[Link]:
+    """Extracts all pandoc Link objects from markdown str.
+
+    Args:
+        pad_content (str): markdown str
+
+    Returns:
+        list[Link]: list of Link objects
+    """
     doc: Pandoc = pandoc.read(pad_content)
     blocks: list = doc[1]
 
