@@ -8,6 +8,12 @@ import pandoc
 import requests
 from pandoc.types import Link, Pandoc
 
+log.basicConfig(filename=f"{__file__}.log", filemode="w", level=log.DEBUG)
+
+# setting up working directory
+WORKING_DIR: Path = Path("/home/dodo/chaosdorf_vault")
+WORKING_DIR.mkdir(exist_ok=True)
+
 
 def download(url: str) -> str:
     """Downloads pad content from url.
@@ -77,14 +83,15 @@ def substitute_links(pad_content: str):
     link_obj: Link
     for link_obj in link_objects:
         _, inline, target = link_obj
-        url: ParseResult = urlparse(target[0])
+        url_str: str = target[0]
+        url: ParseResult = urlparse(url_str)
         text: str = pandoc.write(inline).strip()
 
         if url.netloc != DOMAIN:
             continue
 
         pad_id: str = url.path.strip("/")
-        html_link: str = pandoc.write(link_obj).strip()
+        html_link: str = f"[{text}]({url_str})"
         obsidian_link: str = f"[[{pad_id}.md|{text}]]"
 
         log.info(f"replaced {html_link!r} with {obsidian_link!r}")
@@ -97,29 +104,26 @@ def clean_url(url: ParseResult) -> str:
     return urljoin(url.geturl(), url.path)
 
 
-log.basicConfig(filename=f"{__file__}.log", filemode="w", level=log.INFO)
-
-DOMAIN: str = "md.chaosdorf.de"
-START_URL: str = f"https://{DOMAIN}/navigation"
-
-# setting up working directory
-WORKING_DIR: Path = Path("/home/dodo/chaosdorf_vault")
-WORKING_DIR.mkdir(exist_ok=True)
+start: str = f"https://md.chaosdorf.de/navigation"
+start_url: ParseResult = urlparse(start)
+DOMAIN: str = start_url.netloc
 
 to_check: set[str] = set()
 checked: set[str] = set()
 
-to_check.add(START_URL)
+to_check.add(start)
 
 while to_check:
     current_url: str = to_check.pop()
     current_pad: str = download(current_url)
     pad_id: str = urlparse(current_url).path.strip("/")
 
-    log.info(f"{current_url=}")
+    log.info(f"{pad_id=}")
 
     links: list[ParseResult] = get_intern_links(current_pad)
     log.info(f"{len(links)} link objects were found")
+
+    print(f"found {len(links):>3} links in {pad_id!r}")
 
     link: ParseResult
     for link in links:
