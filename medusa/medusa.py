@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging as log
+from argparse import ArgumentParser
 from pathlib import Path
 from typing import Generator, TextIO
 from urllib.parse import ParseResult, urljoin, urlparse
@@ -8,11 +9,7 @@ import pandoc
 import requests
 from pandoc.types import Link, Pandoc
 
-log.basicConfig(filename=f"{__file__}.log", filemode="w", level=log.DEBUG)
-
-# setting up working directory
-WORKING_DIR: Path = Path("/home/dodo/chaosdorf_vault")
-WORKING_DIR.mkdir(exist_ok=True)
+log.basicConfig(filename=f"{Path(__file__).stem}.log", filemode="w", level=log.INFO)
 
 
 def download(url: str) -> str:
@@ -32,7 +29,7 @@ def download(url: str) -> str:
     status_code: int = response.status_code
 
     if status_code == 200:
-        content = response.text
+        content: str = response.text
     else:
         log.error(f"Couldn't download pad {url}")
         raise Exception("Couldn't download pad {url}")
@@ -58,7 +55,7 @@ def extract_link_objects(pad_content: str) -> list[Link]:
     return link_objects
 
 
-def get_intern_links(pad_content: str):
+def get_intern_links(pad_content: str) -> list[ParseResult]:
     links: list[ParseResult] = []
     link_obj: Link
     for link_obj in extract_link_objects(pad_content):
@@ -71,7 +68,7 @@ def get_intern_links(pad_content: str):
     return links
 
 
-def substitute_links(pad_content: str):
+def substitute_links(pad_content: str) -> str:
     doc: Pandoc = pandoc.read(pad_content)
     blocks: list = doc[1]
 
@@ -104,44 +101,70 @@ def clean_url(url: ParseResult) -> str:
     return urljoin(url.geturl(), url.path)
 
 
-start: str = f"https://md.chaosdorf.de/navigation"
-start_url: ParseResult = urlparse(start)
-DOMAIN: str = start_url.netloc
+def main(start: str) -> None:
+    to_check: set[str] = set()
+    checked: set[str] = set()
 
-to_check: set[str] = set()
-checked: set[str] = set()
+    to_check.add(start)
 
-to_check.add(start)
+    while to_check:
+        current_url: str = to_check.pop()
+        current_pad: str = download(current_url)
+        pad_id: str = urlparse(current_url).path.strip("/")
 
-while to_check:
-    current_url: str = to_check.pop()
-    current_pad: str = download(current_url)
-    pad_id: str = urlparse(current_url).path.strip("/")
+        log.info(f"{pad_id=}")
 
-    log.info(f"{pad_id=}")
+        links: list[ParseResult] = get_intern_links(current_pad)
+        log.info(f"{len(links)} link objects were found")
 
-    links: list[ParseResult] = get_intern_links(current_pad)
-    log.info(f"{len(links)} link objects were found")
+        print(f"found {len(links):>3} links in {pad_id!r}")
 
-    print(f"found {len(links):>3} links in {pad_id!r}")
+        # clean links (remove fragments)
+        cleaned_links: list[str] = list(map(clean_url, links))
 
-    link: ParseResult
-    for link in links:
-        if clean_url(link) == current_url:
-            # ignore circular links
-            log.info(f"ignored {clean_url(link)} (circular)")
-            continue
+        link: str
+        for link in cleaned_links:
+            if link == current_url:
+                # ignore circular links
+                log.info(f"ignored {link} (circular)")
+                continue
 
-        to_check.add(clean_url(link))
-    checked.add(current_url)
+            to_check.add(link)
+        checked.add(current_url)
 
-    filename: str = f"{pad_id}.md"
-    filepath: Path = WORKING_DIR / Path(filename)
+        filename: str = f"{pad_id}.md"
+        filepath: Path = WORKING_DIR / Path(filename)
 
-    log.info(f"save pad @ {filepath}")
+        log.info(f"save pad @ {filepath}")
 
-    substituted_pad = substitute_links(current_pad)
+        # substitute html link with obsidian syntax
+        substituted_pad = substitute_links(current_pad)
 
-    stream: TextIO
-    with filepath.open("w", encoding="UTF-8") as stream:
-        stream.write(substituted_pad)
+        # write to FS
+        stream: TextIO
+        with filepath.open("w", encoding="UTF-8") as stream:
+            stream.write(substituted_pad)
+
+
+if __name__ == "__main__":
+    # create ArgumentParser
+    parser: ArgumentParser = ArgumentParser(
+        prog="medusa",
+        description="create local obsidian vault from your HedgeDoc pads",
+    )
+
+    # add arguments
+    parser.add_argument("start_url", type=str, help="start url")
+    parser.add_argument("-p", "--path", type=Path, help="vault path")
+
+    # parse args
+    args = parser.parse_args()
+
+    # setting up working directory
+    WORKING_DIR: Path = args.path
+    WORKING_DIR.mkdir(exist_ok=True)
+
+    start: str = args.start_url
+    start_url: ParseResult = urlparse(start)
+    DOMAIN: str = start_url.netloc
+    main(start)
