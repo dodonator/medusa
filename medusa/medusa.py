@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 import logging as log
-from argparse import ArgumentParser
+from argparse import ArgumentParser, BooleanOptionalAction
 from pathlib import Path
 from typing import Generator, TextIO
 from urllib.parse import ParseResult, urljoin, urlparse
@@ -101,7 +101,39 @@ def clean_url(url: ParseResult) -> str:
     return urljoin(url.geturl(), url.path)
 
 
-def main(start: str) -> None:
+def rename_links(working_dir: Path):
+    translation_table: dict[Path, str] = {}
+
+    file: Path
+    for file in working_dir.glob("*.md"):
+        # open file to get title
+        stream: TextIO
+        with file.open(mode="r") as stream:
+            for line in stream:
+                if "/" in line:
+                    line = line.replace("/", "_")
+
+                if line.startswith("# "):
+                    title: str = line[2:].strip()
+                    translation_table[file] = f"{title}.md"
+                    print(f"found title {title!r} in {file.stem!r}")
+                    continue
+
+    for file, title in translation_table.items():
+        content: str = file.read_text()
+
+        for f, t in translation_table.items():
+            content = content.replace(f.name, t)
+
+        # save changed content
+        file.write_text(content)
+
+        # rename current file
+        log.info(f"renamed {file.name} to {title}")
+        file.rename(working_dir / Path(f"{title}"))
+
+
+def crawl(start: str) -> None:
     to_check: set[str] = set()
     checked: set[str] = set()
 
@@ -155,7 +187,15 @@ if __name__ == "__main__":
 
     # add arguments
     parser.add_argument("start_url", type=str, help="start url")
-    parser.add_argument("-p", "--path", type=Path, help="vault path")
+    parser.add_argument("-p", "--path", type=Path, required=False, help="vault path")
+    parser.add_argument(
+        "-r",
+        "--rename",
+        action=BooleanOptionalAction,
+        required=False,
+        default=True,
+        help="wether files should be renamed",
+    )
 
     # parse args
     args = parser.parse_args()
@@ -167,4 +207,8 @@ if __name__ == "__main__":
     start: str = args.start_url
     start_url: ParseResult = urlparse(start)
     DOMAIN: str = start_url.netloc
-    main(start)
+    crawl(start)
+
+    if args.rename:
+        # rename files and apply update links
+        rename_links(WORKING_DIR)
